@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(name = "department")
 public class Department {
     @Id
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    //@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @GeneratedValue(generator = "UUID")
     @Column(name = "id_department")
     private UUID idDepartment;
