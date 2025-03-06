@@ -56,4 +56,9 @@ public class UserInfo {
             idUserInfo = UUID.randomUUID();
         }
     }
+
+
+    UserInfo(UUID idUserInfo){
+        this.idUserInfo = idUserInfo;
+    }
 }
