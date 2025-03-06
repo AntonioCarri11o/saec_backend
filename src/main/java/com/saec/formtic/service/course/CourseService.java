@@ -21,7 +21,6 @@ import org.springframework.validation.FieldError;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 @Service
 public class CourseService {
     @Autowired
@@ -38,7 +37,7 @@ public class CourseService {
 
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
-                    500, "Ha ocurrido un error, favor de intentarlo mas tarde", true, null
+                    500, "An error has occurred, please try again later", true, null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -48,7 +47,7 @@ public class CourseService {
             Optional<Course> courses = courseRepository.findById(courseId);
             if (courses.isEmpty()) {
                 return new ResponseEntity<>(new CustomResponse<>(
-                        404, "Curso no encontrado", true, null
+                        404, "Course not found", true, null
                 ), HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(new CustomResponse<>(
@@ -56,7 +55,7 @@ public class CourseService {
             ), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
-                    500, "Ha ocurrido un error, favor de intentarlo mas tarde", true, null
+                    500, "An error has occurred, please try again later", true, null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -65,8 +64,8 @@ public class CourseService {
         try {
             Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
 
-            //si el nombre esta vacio te devuelve todos, si no ets vacio aplica el filtro por nombre
-            //SIEMPRE SE APLICA EL PAGINADOR
+            // If the name is empty, return all courses; otherwise, filter by name
+            // Pagination is always applied
             Page<Course> courses = (name == null || name.trim().isEmpty()) ?
                     courseRepository.findAll(pageable) :
                     courseRepository.findByNameContainingIgnoreCase(name, pageable);
@@ -77,31 +76,28 @@ public class CourseService {
 
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
-                    500, "Ha ocurrido un error, favor de intentarlo más tarde", true, null
+                    500, "An error has occurred, please try again later", true, null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
     public ResponseEntity<CustomResponse<Course>> createCourse(@Valid UpdateCreateCourseDTO courseDTO) {
         try {
-
-
-            // Verifica si ya existe un curso con el mismo nombre
+            // Check if a course with the same name already exists
             if (courseRepository.existsByName(courseDTO.getName())) {
                 return new ResponseEntity<>(new CustomResponse<>(
-                        400, "El curso ya existe", true, null
+                        400, "The course already exists", true, null
                 ), HttpStatus.BAD_REQUEST);
             }
 
-            // Crea el objeto del curso
+            // Create the course object
             Course course = new Course();
             course.setName(courseDTO.getName());
             course.setDescription(courseDTO.getDescription());
 
-            // Asigna el profesor si existe
+            // Assign the teacher if they exist
             if (courseDTO.getTeacherId() != null && !courseDTO.getTeacherId().toString().isEmpty()) {
-                UUID teacherId = courseDTO.getTeacherId();  // No es necesario convertir de nuevo
+                UUID teacherId = courseDTO.getTeacherId();
                 if (teacherRepository.existsById(teacherId)) {
                     Teacher teacher = new Teacher();
                     teacher.setIdUserInfo(teacherId);
@@ -109,29 +105,26 @@ public class CourseService {
                 }
             }
 
-            // Guarda el curso
+            // Save the course
             Course savedCourse = courseRepository.save(course);
 
             return new ResponseEntity<>(new CustomResponse<>(
-                    201, "Curso creado exitosamente", false, savedCourse
-                    ), HttpStatus.CREATED);
+                    201, "Course successfully created", false, savedCourse
+            ), HttpStatus.CREATED);
 
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
-                    500, "Ha ocurrido un error al crear el curso, favor de intentarlo más tarde", true, null
+                    500, "An error occurred while creating the course, please try again later", true, null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-
     public ResponseEntity<CustomResponse<Course>> updateCourse(@Valid UUID courseId, UpdateCreateCourseDTO dto) {
         try {
-
-
             Optional<Course> optionalCourse = courseRepository.findById(courseId);
             if (optionalCourse.isEmpty()) {
                 return new ResponseEntity<>(new CustomResponse<>(
-                        404, "Curso no encontrado", true, null
+                        404, "Course not found", true, null
                 ), HttpStatus.NOT_FOUND);
             }
 
@@ -139,29 +132,27 @@ public class CourseService {
             course.setName(dto.getName());
             course.setDescription(dto.getDescription());
 
-            // Asigna el profesor si existe
+            // Assign the teacher if they exist
             if (dto.getTeacherId() != null && !dto.getTeacherId().toString().isEmpty()) {
-                UUID teacherId = dto.getTeacherId();  // No es necesario convertir de nuevo
+                UUID teacherId = dto.getTeacherId();
                 if (teacherRepository.existsById(teacherId)) {
                     Teacher teacher = new Teacher();
                     teacher.setIdUserInfo(teacherId);
                     course.setTeacher(teacher);
                 }
-            }else {
+            } else {
                 course.setTeacher(null);
             }
 
-            // Guardar los cambios
+            // Save the changes
             Course updatedCourse = courseRepository.save(course);
             return new ResponseEntity<>(new CustomResponse<>(
-                    200, "Curso actualizado exitosamente", false, updatedCourse
+                    200, "Course successfully updated", false, updatedCourse
             ), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
-                    500, "Error al actualizar el curso, favor de intentarlo más tarde", true, null
+                    500, "Error updating the course, please try again later", true, null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 }
