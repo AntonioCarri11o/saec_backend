@@ -17,8 +17,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+
 @Service
 public class CourseService {
     @Autowired
@@ -40,17 +42,19 @@ public class CourseService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Optional<Course>>> getCourseById(String courseId) {
+    public ResponseEntity<CustomResponse<Course>> getCourseById(String courseId) {
         try {
-            Optional<Course> courses = courseRepository.findById(UUID.fromString(courseId));
-            if (courses.isEmpty()) {
-                return new ResponseEntity<>(new CustomResponse<>(
-                        404, "Course not found", true, null
-                ), HttpStatus.NOT_FOUND);
-            }
+            Course course = courseRepository.findById(UUID.fromString(courseId))
+                    .orElseThrow(() -> new NoSuchElementException("Course not found"));
+
             return new ResponseEntity<>(new CustomResponse<>(
-                    200, "OK", false, courses
+                    200, "OK", false, course
             ), HttpStatus.OK);
+
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    404, e.getMessage(), true, null
+            ), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
                     500, "An error has occurred, please try again later", true, null
@@ -127,7 +131,10 @@ public class CourseService {
                 ), HttpStatus.NOT_FOUND);
             }
 
-            Course course = optionalCourse.get();
+
+            Course course = courseRepository.findById(UUID.fromString(courseId))
+                    .orElseThrow(() -> new NoSuchElementException("Course not found"));
+
             course.setName(dto.getName());
             course.setDescription(dto.getDescription());
 
@@ -148,6 +155,10 @@ public class CourseService {
             return new ResponseEntity<>(new CustomResponse<>(
                     200, "Course successfully updated", false, updatedCourse
             ), HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    404, e.getMessage(), true, null
+            ), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
                     500, "Error updating the course, please try again later", true, null

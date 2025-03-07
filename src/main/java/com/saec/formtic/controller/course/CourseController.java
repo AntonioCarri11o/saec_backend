@@ -37,7 +37,7 @@ public class CourseController {
     // Endpoint para obtener un corso mediante su UUID
     //http://localhost:8080/api/course/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<CustomResponse<Optional<Course>>> getCourseById(@PathVariable String id) {
+    public ResponseEntity<CustomResponse<Course>> getCourseById(@PathVariable String id) {
         return courseService.getCourseById(id);
     }
 
