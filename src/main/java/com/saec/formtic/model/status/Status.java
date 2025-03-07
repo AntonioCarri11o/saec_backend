@@ -21,13 +21,21 @@ public class Status {
     private UUID idStatus;
 
     @Column(name = "status_name", length = 16, nullable = false)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private StatusName name;
 
     @Column(name = "status_category", length = 24, nullable = false)
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private StatusCategory category;
 
-    @Column(name = "status_description", length = 64, nullable = false)
+    @Column(name = "status_description", length = 255, nullable = false)
     private String description;
+
+    public Status(StatusName name, StatusCategory category, String description) {
+        this.name = name;
+        this.category = category;
+        this.description = description;
+    }
 
     @PrePersist
     private void generateUUID(){

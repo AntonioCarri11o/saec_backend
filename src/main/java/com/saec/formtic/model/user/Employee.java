@@ -1,11 +1,13 @@
 package com.saec.formtic.model.user;
 
+import com.saec.formtic.model.role.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -14,4 +16,14 @@ import lombok.NoArgsConstructor;
 public class Employee extends UserInfo {
     @Column(name = "employee_number", length = 16, nullable = false, unique = true)
     private String employeeNumber;
+
+    public Employee(String username, String password, String name, String lastname, String surname, Date hireDate, String employeeNumber, Role role) {
+        super(username, password, name, lastname, surname, hireDate, role);
+        this.employeeNumber = employeeNumber;
+    }
+
+    public Employee(String username, String password, String name, String lastname, String surname, String employeeNumber, Role role) {
+        super(username, password, name, lastname, surname, role);
+        this.employeeNumber = employeeNumber;
+    }
 }

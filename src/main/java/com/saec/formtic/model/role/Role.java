@@ -2,9 +2,7 @@ package com.saec.formtic.model.role;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -21,10 +19,16 @@ public class Role {
     private UUID idRole;
 
     @Column(name = "name", length = 16, nullable = false)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private RoleName name;
 
     @Column(name = "description", length = 48, nullable = false)
     private String description;
+
+    public Role(RoleName name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
     @PrePersist
     private void generateUUID(){

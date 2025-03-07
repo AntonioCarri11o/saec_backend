@@ -1,5 +1,6 @@
 package com.saec.formtic.model.user;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.saec.formtic.model.role.Role;
 import com.saec.formtic.model.status.Status;
@@ -12,7 +13,6 @@ import java.util.Date;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "user_info")
@@ -24,16 +24,16 @@ public class UserInfo {
     @Column(name = "id_user_info")
     private UUID idUserInfo;
 
-    @Column(name = "username", length = 32, nullable = false)
+    @Column(name = "username", length = 32, nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
-    @Column(name = "name", length = 48, nullable = true)
+    @Column(name = "name", length = 48, nullable = false)
     private String name;
 
-    @Column(name = "lastname", length = 48, nullable = true)
+    @Column(name = "lastname", length = 48, nullable = false)
     private String lastname;
 
     @Column(name = "surname", length = 48, nullable = true)
@@ -55,5 +55,26 @@ public class UserInfo {
         if(idUserInfo == null) {
             idUserInfo = UUID.randomUUID();
         }
+    }
+
+    public UserInfo() {}
+
+    public UserInfo(String username, String password, String name, String lastname, String surname, Date hireDate, Role role) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.lastname = lastname;
+        this.surname = surname;
+        this.hireDate = hireDate;
+        this.role = role;
+    }
+
+    public UserInfo(String username, String password, String name, String lastname, String surname, Role role) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.lastname = lastname;
+        this.surname = surname;
+        this.role = role;
     }
 }

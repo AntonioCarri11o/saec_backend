@@ -36,6 +36,7 @@ public class MainSecurity {
                 .authorizeHttpRequests()
                 .requestMatchers(
                         "/api/**",
+                        "/api/user/employee/create",
                         "/v3/api-docs/**",
                         "/swagger-ui/**",
                         "/doc/swagger-ui/**",
