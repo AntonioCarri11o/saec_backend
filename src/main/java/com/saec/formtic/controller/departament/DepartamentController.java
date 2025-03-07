@@ -31,7 +31,7 @@ public class DepartamentController {
     // Endpoint para obtener un departamento mediante su UUID
     //http://localhost:8080/api/department/{id}
     @GetMapping("{id}")
-    public ResponseEntity<CustomResponse<Optional<Department>>> getDepartamentById(@PathVariable String id) {
+    public ResponseEntity<CustomResponse<Department>> getDepartamentById(@PathVariable String id) {
         return departamentService.getByID(id);
     }
 

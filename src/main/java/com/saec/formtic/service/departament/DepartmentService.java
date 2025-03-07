@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,19 +38,19 @@ public class DepartmentService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Optional<Department>>> getByID(String idDepartment) {
+    public ResponseEntity<CustomResponse<Department>> getByID(String idDepartment) {
         try {
-            Optional<Department> department = departamentRepository.findById(UUID.fromString(idDepartment));
-            if (!department.isPresent()) {
-                return new ResponseEntity<>(new CustomResponse<>(
-                        404, "Department not found", true, null
-                ), HttpStatus.NOT_FOUND);
-            }
+            Department department = departamentRepository.findById(UUID.fromString(idDepartment))
+                    .orElseThrow(() -> new NoSuchElementException("Department not found"));
 
             return new ResponseEntity<>(new CustomResponse<>(
                     200, "OK", false, department
             ), HttpStatus.OK);
 
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    404, e.getMessage(), true, null
+            ), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
                     500, "An error has occurred, please try again later", true, null
@@ -96,7 +97,6 @@ public class DepartmentService {
     }
 
 
-
     public ResponseEntity<CustomResponse<Department>> save(UpdateCreateDepartmentDTO departmentDTO) {
         try {
             boolean exist = this.departamentRepository.existsByName(departmentDTO.getName());
@@ -106,8 +106,8 @@ public class DepartmentService {
                 ), HttpStatus.BAD_REQUEST);
             }
 
-            Department saveDepartment=new Department(null,departmentDTO.getName());
-            Department savedDepartment=departamentRepository.save(saveDepartment);
+            Department saveDepartment = new Department(null, departmentDTO.getName());
+            Department savedDepartment = departamentRepository.save(saveDepartment);
 
             return new ResponseEntity<>(new CustomResponse<>(
                     200, "Department successfully created", false, savedDepartment
@@ -121,12 +121,8 @@ public class DepartmentService {
 
     public ResponseEntity<CustomResponse<Department>> update(UpdateCreateDepartmentDTO departmentDTO, String idDepartment) {
         try {
-            Optional<Department> department = departamentRepository.findById(UUID.fromString(idDepartment));
-            if (department.isEmpty()) {
-                return new ResponseEntity<>(new CustomResponse<>(
-                        400, "Department not found", true, null
-                ), HttpStatus.BAD_REQUEST);
-            }
+            Department department = departamentRepository.findById(UUID.fromString(idDepartment))
+                    .orElseThrow(() -> new NoSuchElementException("Department not found"));
 
 
             // Verificar si existe otro departamento con el mismo nombre
@@ -137,21 +133,23 @@ public class DepartmentService {
                 ), HttpStatus.BAD_REQUEST);
             }
 
-
-            department.get().setName(departmentDTO.getName());
-            departamentRepository.save(department.get());
+            department.setName(departmentDTO.getName());
+            departamentRepository.save(department);
             return new ResponseEntity<>(new CustomResponse<>(
-                    200, "Department successfully updated", false, department.get()
+                    200, "Department successfully updated", false, department
             ), HttpStatus.OK);
 
 
-        }catch (Exception e) {
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    404, e.getMessage(), true, null
+            ), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
                     500, "An error occurred while updating the department, please try again later", true, null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 
 
 }
