@@ -1,6 +1,5 @@
 package com.saec.formtic.model.course;
 
-import com.saec.formtic.model.status.Status;
 import com.saec.formtic.model.user.Teacher;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

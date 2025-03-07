@@ -1,6 +1,5 @@
 package com.saec.formtic.model.user;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.saec.formtic.model.role.Role;
 import com.saec.formtic.model.status.Status;
@@ -13,6 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "user_info")
@@ -57,7 +57,10 @@ public class UserInfo {
         }
     }
 
-    public UserInfo() {}
+
+    UserInfo(UUID idUserInfo){
+        this.idUserInfo = idUserInfo;
+    }
 
     public UserInfo(String username, String password, String name, String lastname, String surname, Date hireDate, Role role) {
         this.username = username;
