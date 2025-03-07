@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Controller
+@RestController
 @RequestMapping("/api/course")
 @CrossOrigin({"*"})
 public class CourseController {
@@ -37,7 +37,7 @@ public class CourseController {
     // Endpoint para obtener un corso mediante su UUID
     //http://localhost:8080/api/course/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<CustomResponse<Optional<Course>>> getCourseById(@PathVariable UUID id) {
+    public ResponseEntity<CustomResponse<Optional<Course>>> getCourseById(@PathVariable String id) {
         return courseService.getCourseById(id);
     }
 
@@ -64,7 +64,7 @@ public class CourseController {
     //para actualizar el curso
     @PutMapping("/{courseId}")
     public ResponseEntity<CustomResponse<Course>> updateCourse(
-            @PathVariable UUID courseId,
+            @PathVariable String courseId,
             @Valid @RequestBody UpdateCreateCourseDTO dto) {
         return courseService.updateCourse(courseId, dto);
     }

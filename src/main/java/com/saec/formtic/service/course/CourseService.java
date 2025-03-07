@@ -2,9 +2,9 @@ package com.saec.formtic.service.course;
 
 import com.saec.formtic.controller.course.courseDTO.UpdateCreateCourseDTO;
 import com.saec.formtic.model.course.Course;
-import com.saec.formtic.model.course.CourseRepository;
+import com.saec.formtic.repository.course.CourseRepository;
 import com.saec.formtic.model.user.Teacher;
-import com.saec.formtic.model.user.TeacherRepository;
+import com.saec.formtic.repository.user.TeacherRepository;
 import com.saec.formtic.utils.CustomResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,9 +40,9 @@ public class CourseService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Optional<Course>>> getCourseById(UUID courseId) {
+    public ResponseEntity<CustomResponse<Optional<Course>>> getCourseById(String courseId) {
         try {
-            Optional<Course> courses = courseRepository.findById(courseId);
+            Optional<Course> courses = courseRepository.findById(UUID.fromString(courseId));
             if (courses.isEmpty()) {
                 return new ResponseEntity<>(new CustomResponse<>(
                         404, "Course not found", true, null
@@ -97,7 +95,8 @@ public class CourseService {
 
             // Assign the teacher if they exist
             if (courseDTO.getTeacherId() != null && !courseDTO.getTeacherId().toString().isEmpty()) {
-                UUID teacherId = courseDTO.getTeacherId();
+                UUID teacherId = UUID.fromString(courseDTO.getTeacherId());
+
                 if (teacherRepository.existsById(teacherId)) {
                     Teacher teacher = new Teacher();
                     teacher.setIdUserInfo(teacherId);
@@ -119,9 +118,9 @@ public class CourseService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Course>> updateCourse(@Valid UUID courseId, UpdateCreateCourseDTO dto) {
+    public ResponseEntity<CustomResponse<Course>> updateCourse(String courseId, UpdateCreateCourseDTO dto) {
         try {
-            Optional<Course> optionalCourse = courseRepository.findById(courseId);
+            Optional<Course> optionalCourse = courseRepository.findById(UUID.fromString(courseId));
             if (optionalCourse.isEmpty()) {
                 return new ResponseEntity<>(new CustomResponse<>(
                         404, "Course not found", true, null
@@ -134,7 +133,7 @@ public class CourseService {
 
             // Assign the teacher if they exist
             if (dto.getTeacherId() != null && !dto.getTeacherId().toString().isEmpty()) {
-                UUID teacherId = dto.getTeacherId();
+                UUID teacherId = UUID.fromString(dto.getTeacherId());
                 if (teacherRepository.existsById(teacherId)) {
                     Teacher teacher = new Teacher();
                     teacher.setIdUserInfo(teacherId);

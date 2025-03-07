@@ -10,13 +10,13 @@ import java.util.UUID;
 @Getter
 @Setter
 public class UpdateCreateCourseDTO {
-    @NotBlank(message = "The course name cannot be empty")
-    @Size(max = 128, message = "The course name cannot exceed 128 characters")
+    @NotBlank(message = "Course name is mandatory")
+    @Size(max = 128, message = "The course must not exceed 128 characters")
     private String name;
 
-    @NotBlank(message = "The course description cannot be empty")
-    @Size(max = 255, message = "The description cannot exceed 255 characters")
+    @NotBlank(message = "Course description is mandatory")
+    @Size(max = 255, message = "The description must not exceed 128 characters")
     private String description;
 
-    private UUID teacherId;
+    private String teacherId;
 }
