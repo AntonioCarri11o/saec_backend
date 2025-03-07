@@ -8,17 +8,15 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
-@Controller
+@RestController
 @RequestMapping("/api/department")
-@CrossOrigin(origins = "*")
+@CrossOrigin({"*"})
 public class DepartamentController {
     @Autowired
     private DepartmentService departamentService;
@@ -29,10 +27,11 @@ public class DepartamentController {
     public ResponseEntity<CustomResponse<List<Department>>> getAllDepartaments() {
         return departamentService.getAll();
     }
+
     // Endpoint para obtener un departamento mediante su UUID
     //http://localhost:8080/api/department/{id}
     @GetMapping("{id}")
-    public ResponseEntity<CustomResponse<Optional<Department>>> getDepartamentById(@PathVariable UUID id) {
+    public ResponseEntity<CustomResponse<Optional<Department>>> getDepartamentById(@PathVariable String id) {
         return departamentService.getByID(id);
     }
 
@@ -47,6 +46,12 @@ public class DepartamentController {
         return departamentService.getByPage(page, size);
     }
 
+    @DeleteMapping("/filter/{name}")
+    public ResponseEntity<CustomResponse<List<Department>>> deleteDepartamentByName(@PathVariable String name) {
+        return departamentService.getAllByName(name);
+    }
+
+
     //para crear un nuevo departamento
     @PostMapping("/create")
     public ResponseEntity<CustomResponse<Department>> createDepartament(@Valid @RequestBody UpdateCreateDepartmentDTO departmentDTO) {
@@ -56,12 +61,9 @@ public class DepartamentController {
 
     //para actualizar el departamento
     @PutMapping("/update/{id}")
-    public ResponseEntity<CustomResponse<Department>> updateDepartament(@Valid @RequestBody UpdateCreateDepartmentDTO departmentDTO, @PathVariable UUID id) {
+    public ResponseEntity<CustomResponse<Department>> updateDepartament(@Valid @RequestBody UpdateCreateDepartmentDTO departmentDTO, @PathVariable String id) {
         return departamentService.update(departmentDTO, id);
     }
-
-
-
 
 
 }

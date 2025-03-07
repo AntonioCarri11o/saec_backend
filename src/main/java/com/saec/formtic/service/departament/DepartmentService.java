@@ -1,7 +1,7 @@
 package com.saec.formtic.service.departament;
 
 import com.saec.formtic.controller.departament.departmetDTO.UpdateCreateDepartmentDTO;
-import com.saec.formtic.model.department.DepartmentRepository;
+import com.saec.formtic.repository.department.DepartmentRepository;
 import com.saec.formtic.model.department.Department;
 import com.saec.formtic.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +37,9 @@ public class DepartmentService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Optional<Department>>> getByID(UUID idDepartment) {
+    public ResponseEntity<CustomResponse<Optional<Department>>> getByID(String idDepartment) {
         try {
-            Optional<Department> department = departamentRepository.findById(idDepartment);
+            Optional<Department> department = departamentRepository.findById(UUID.fromString(idDepartment));
             if (!department.isPresent()) {
                 return new ResponseEntity<>(new CustomResponse<>(
                         404, "Department not found", true, null
@@ -73,6 +73,29 @@ public class DepartmentService {
         }
     }
 
+    public ResponseEntity<CustomResponse<List<Department>>> getAllByName(String name) {
+        try {
+            List<Department> departments;
+
+            // Si name está vacío o es null, obtenemos todos los departamentos
+            if (name == null || name.trim().isEmpty()) {
+                departments = this.departamentRepository.findAll();
+            } else {
+                departments = this.departamentRepository.getAllByNameContainingIgnoreCase(name);
+            }
+
+            return new ResponseEntity<>(new CustomResponse<>(
+                    200, "OK", false, departments
+            ), HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    500, "An error has occurred, please try again later", true, null
+            ), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 
     public ResponseEntity<CustomResponse<Department>> save(UpdateCreateDepartmentDTO departmentDTO) {
         try {
@@ -96,14 +119,24 @@ public class DepartmentService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Department>> update(UpdateCreateDepartmentDTO departmentDTO, UUID idDepartment) {
+    public ResponseEntity<CustomResponse<Department>> update(UpdateCreateDepartmentDTO departmentDTO, String idDepartment) {
         try {
-            Optional<Department> department = departamentRepository.findById(idDepartment);
+            Optional<Department> department = departamentRepository.findById(UUID.fromString(idDepartment));
             if (department.isEmpty()) {
                 return new ResponseEntity<>(new CustomResponse<>(
                         400, "Department not found", true, null
                 ), HttpStatus.BAD_REQUEST);
             }
+
+
+            // Verificar si existe otro departamento con el mismo nombre
+            Optional<Department> existingDepartment = departamentRepository.findByName(departmentDTO.getName());
+            if (existingDepartment.isPresent() && !existingDepartment.get().getIdDepartment().equals(UUID.fromString(idDepartment))) {
+                return new ResponseEntity<>(new CustomResponse<>(
+                        400, "A department with this name already exists", true, null
+                ), HttpStatus.BAD_REQUEST);
+            }
+
 
             department.get().setName(departmentDTO.getName());
             departamentRepository.save(department.get());

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class UpdateCreateDepartmentDTO {
-    @NotBlank (message = "The department name cannot be empty")
-    @Size(max = 128, message = "The department name cannot exceed 128 characters")
+    @NotBlank (message = "Department name is mandatory")
+    @Size(max = 128, message = "Department name must not exceed 128 characters")
     private String name;
 }
