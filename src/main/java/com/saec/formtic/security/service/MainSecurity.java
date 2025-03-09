@@ -2,6 +2,7 @@ package com.saec.formtic.security.service;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -22,7 +23,7 @@ public class MainSecurity {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api/auth/**",
-            "/**",
+            "/**"
     };
     public static String[] getWhitelist() {
         return WHITELIST;
@@ -35,13 +36,7 @@ public class MainSecurity {
                 .disable()
                 .authorizeHttpRequests()
                 .requestMatchers(
-                        "/api/**",
-                        "/api/user/employee/create",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/doc/swagger-ui/**",
-                        "/api/auth/**",
-                        "/swagger-ui.html"
+                        getWhitelist()
                 ).permitAll().anyRequest().authenticated();
         return http.build();
     }

@@ -1,7 +1,9 @@
 package com.saec.formtic.controller.user.employee;
 
 import com.saec.formtic.controller.user.employee.employeeDTO.EmployeeDTO;
+import com.saec.formtic.model.user.Employee;
 import com.saec.formtic.service.user.EmployeeService;
+import com.saec.formtic.utils.CustomResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,13 +18,8 @@ public class EmployeeController {
     EmployeeService employeeService;
 
     @PostMapping("/create")
-    public ResponseEntity<String> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
-        try {
-            employeeService.createEmployee(employeeDTO);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-        return ResponseEntity.status(HttpStatus.OK).body("Nuevo usuario creado");
+    public ResponseEntity<CustomResponse<Employee>> createEmployee(@Valid @RequestBody EmployeeDTO employeeDTO) {
+        return employeeService.createEmployee(employeeDTO);
     }
 
 }
