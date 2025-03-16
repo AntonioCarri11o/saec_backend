@@ -18,16 +18,13 @@ import com.saec.formtic.repository.status.StatusRepository;
 import com.saec.formtic.repository.user.EmployeeRepository;
 import com.saec.formtic.utils.CustomResponse;
 import com.saec.formtic.utils.Utils;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

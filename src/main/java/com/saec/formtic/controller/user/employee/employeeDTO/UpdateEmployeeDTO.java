@@ -3,7 +3,6 @@ package com.saec.formtic.controller.user.employee.employeeDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.saec.formtic.validation.annotation.GlobalText;
 import com.saec.formtic.validation.validator.enums.TextPattern;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

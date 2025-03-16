@@ -3,12 +3,10 @@ package com.saec.formtic.controller.user.employee.employeeDTO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.saec.formtic.model.role.Role;
 import com.saec.formtic.model.user.Employee;
-import com.saec.formtic.model.user.UserInfo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Data
