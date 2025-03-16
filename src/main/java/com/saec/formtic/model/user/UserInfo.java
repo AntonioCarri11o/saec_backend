@@ -1,6 +1,8 @@
 package com.saec.formtic.model.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.saec.formtic.model.role.Role;
 import com.saec.formtic.model.status.Status;
 import jakarta.persistence.*;
@@ -18,30 +20,33 @@ import java.util.UUID;
 @Table(name = "user_info")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class UserInfo {
+    public interface BasicView {}
+    public interface ListView extends BasicView{}
+    public interface ProfileView extends ListView {}
+
     @Id
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @GeneratedValue(generator = "UUID")
     @Column(name = "id_user_info")
+    @JsonView(BasicView.class)
     private UUID idUserInfo;
 
+    @JsonView(ProfileView.class)
     @Column(name = "username", length = 32, nullable = false, unique = true)
     private String username;
 
+    @JsonIgnore
     @Column(name = "password", length = 255, nullable = false)
     private String password;
 
-    @Column(name = "name", length = 48, nullable = false)
-    private String name;
-
-    @Column(name = "lastname", length = 48, nullable = false)
-    private String lastname;
-
-    @Column(name = "surname", length = 48, nullable = true)
-    private String surname;
+    @JsonView(ListView.class)
+    @Column(name = "fullname", length = 146, nullable = false)
+    private String fullname;
 
     @Column(name = "hire_date", nullable = true)
     private Date hireDate;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fk_role")
     private Role role;
@@ -62,22 +67,18 @@ public class UserInfo {
         this.idUserInfo = idUserInfo;
     }
 
-    public UserInfo(String username, String password, String name, String lastname, String surname, Date hireDate, Role role) {
+    public UserInfo(String username, String password, String name, Date hireDate, Role role) {
         this.username = username;
         this.password = password;
-        this.name = name;
-        this.lastname = lastname;
-        this.surname = surname;
+        this.fullname = name;
         this.hireDate = hireDate;
         this.role = role;
     }
 
-    public UserInfo(String username, String password, String name, String lastname, String surname, Role role) {
+    public UserInfo(String username, String password, String name, Role role) {
         this.username = username;
         this.password = password;
-        this.name = name;
-        this.lastname = lastname;
-        this.surname = surname;
+        this.fullname = name;
         this.role = role;
     }
 }

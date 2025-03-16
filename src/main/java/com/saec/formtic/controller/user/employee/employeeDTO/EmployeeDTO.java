@@ -30,13 +30,6 @@ public class EmployeeDTO {
     @Size(max = 48, message = "The name must not exceed 48 characters")
     String name;
 
-    @NotBlank(message = "Lastname is mandatory")
-    @Size(max = 48, message = "The lastname must not exceed 48 characters")
-    String lastname;
-
-    @Size(max = 48, message = "Surname most not exceed 48 characters")
-    String surname = "";
-
     @JsonFormat(pattern = "yyyy-MM-dd")
     Date hireDate;
 
@@ -46,8 +39,6 @@ public class EmployeeDTO {
                     username,
                     password,
                     name,
-                    lastname,
-                    surname,
                     hireDate,
                     employeeNumber,
                     role
@@ -56,8 +47,6 @@ public class EmployeeDTO {
                 username,
                 password,
                 name,
-                lastname,
-                surname,
                 employeeNumber,
                 role
         );

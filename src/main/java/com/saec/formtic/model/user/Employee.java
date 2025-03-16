@@ -17,13 +17,13 @@ public class Employee extends UserInfo {
     @Column(name = "employee_number", length = 16, nullable = false, unique = true)
     private String employeeNumber;
 
-    public Employee(String username, String password, String name, String lastname, String surname, Date hireDate, String employeeNumber, Role role) {
-        super(username, password, name, lastname, surname, hireDate, role);
+    public Employee(String username, String password, String name, Date hireDate, String employeeNumber, Role role) {
+        super(username, password, name, hireDate, role);
         this.employeeNumber = employeeNumber;
     }
 
-    public Employee(String username, String password, String name, String lastname, String surname, String employeeNumber, Role role) {
-        super(username, password, name, lastname, surname, role);
+    public Employee(String username, String password, String name, String employeeNumber, Role role) {
+        super(username, password, name, role);
         this.employeeNumber = employeeNumber;
     }
 }
