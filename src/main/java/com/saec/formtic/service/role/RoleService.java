@@ -10,8 +10,12 @@ import java.util.Optional;
 
 @Service
 public class RoleService {
+    private final RoleRepository roleRepository;
+
     @Autowired
-    RoleRepository roleRepository;
+    public RoleService(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
     public Role getRoleByName(RoleName roleName) throws Exception{
         Optional<Role> roleOptional = roleRepository.findFirstByName(roleName);
