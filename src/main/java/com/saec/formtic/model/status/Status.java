@@ -1,7 +1,14 @@
 package com.saec.formtic.model.status;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Column;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,13 +28,21 @@ public class Status {
     private UUID idStatus;
 
     @Column(name = "status_name", length = 16, nullable = false)
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private StatusName name;
 
     @Column(name = "status_category", length = 24, nullable = false)
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private StatusCategory category;
 
-    @Column(name = "status_description", length = 64, nullable = false)
+    @Column(name = "status_description", length = 255, nullable = false)
     private String description;
+
+    public Status(StatusName name, StatusCategory category, String description) {
+        this.name = name;
+        this.category = category;
+        this.description = description;
+    }
 
     @PrePersist
     private void generateUUID(){
