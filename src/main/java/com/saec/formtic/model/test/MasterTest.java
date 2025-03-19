@@ -1,7 +1,8 @@
-package com.saec.formtic.model;
+package com.saec.formtic.model.test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.saec.formtic.model.course.Course;
+import com.saec.formtic.model.status.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,10 +21,10 @@ public class MasterTest {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @GeneratedValue(generator = "UUID")
     @Column(name = "id_master_test")
-    private UUID id;
+    private UUID idMasterTest;
 
-    @Column(name = "current_version", length = 16, nullable = false)
-    private String currentVersion;
+    @Column(name = "version", length = 16, nullable = false)
+    private String version;
 
     @Column(name = "name", length = 128, nullable = false)
     private String name;
@@ -32,8 +33,17 @@ public class MasterTest {
     private Date expirationDate;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "fk_status")
+    private Status status;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fk_course")
     private Course course;
 
-
+    @PrePersist
+    private void generateUUID() {
+        if(this.idMasterTest == null) {
+            this.idMasterTest = UUID.randomUUID();
+        }
+    }
 }
