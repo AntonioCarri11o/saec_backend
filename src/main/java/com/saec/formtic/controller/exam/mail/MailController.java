@@ -2,10 +2,14 @@ package com.saec.formtic.controller.exam.mail;
 
 import com.saec.formtic.controller.exam.mail.mailDTO.MailRequestDTO;
 import com.saec.formtic.service.mail.MailServise;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailSender;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
 @RequestMapping("/api/mail")
