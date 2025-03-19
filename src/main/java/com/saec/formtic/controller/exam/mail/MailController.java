@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/mail")
 @CrossOrigin({"*"})
 public class MailController {
-    @Autowired
-    private MailServise mailServise;
+    private final MailServise mailServise;
+
+    public MailController(MailServise mailServise) {
+        this.mailServise = mailServise;
+    }
 
     @PostMapping("/basic")
     public void sendMail(@RequestBody MailRequestDTO mailRequestDTO) throws MessagingException {
