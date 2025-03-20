@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,14 +40,16 @@ public class EmployeeService {
     StatusRepository statusRepository;
     DepartmentRepository departmentRepository;
     JobAssignmentRepository jobAssignmentRepository;
+    private PasswordEncoder encoder;
 
     @Autowired
-    EmployeeService(EmployeeRepository employeeRepository, RoleRepository roleRepository, StatusRepository statusRepository, DepartmentRepository departmentRepository, JobAssignmentRepository jobAssignmentRepository) {
+    EmployeeService(EmployeeRepository employeeRepository, RoleRepository roleRepository, StatusRepository statusRepository, DepartmentRepository departmentRepository, JobAssignmentRepository jobAssignmentRepository, PasswordEncoder encoder) {
         this.employeeRepository = employeeRepository;
         this.roleRepository = roleRepository;
         this.statusRepository = statusRepository;
         this.departmentRepository = departmentRepository;
         this.jobAssignmentRepository = jobAssignmentRepository;
+        this.encoder = encoder;
     }
 
 
@@ -163,6 +166,8 @@ public class EmployeeService {
             Optional<Employee> employeeOptional = employeeRepository.findFirstByUsername(employeeDTO.getUsername());
             if(employeeOptional.isPresent())
                 return new ResponseEntity<>(new CustomResponse<>(409, "The employee username is already in use", true, null), HttpStatus.CONFLICT);
+            String hashedPassword = encoder.encode(employeeDTO.getPassword());
+            employeeDTO.setPassword(hashedPassword);
             Employee employee = employeeDTO.createEmployee(employeeRole);
             Employee savedEmployee = employeeRepository.save(employee);
             return ResponseEntity.status(HttpStatus.CREATED).body(new CustomResponse(201, "The employee was created", false, savedEmployee));
