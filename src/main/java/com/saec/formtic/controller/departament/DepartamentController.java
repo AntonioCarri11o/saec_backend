@@ -46,8 +46,9 @@ public class DepartamentController {
         return departamentService.getByPage(page, size);
     }
 
-    @DeleteMapping("/filter/{name}")
-    public ResponseEntity<CustomResponse<List<Department>>> deleteDepartamentByName(@PathVariable String name) {
+    //Endpoint para obtiener por nombre
+    @GetMapping("/filter/{name}")
+    public ResponseEntity<CustomResponse<List<Department>>> getDepartamentByName(@PathVariable String name) {
         return departamentService.getAllByName(name);
     }
 

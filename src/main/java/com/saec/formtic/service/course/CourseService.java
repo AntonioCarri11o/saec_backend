@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Service
 public class CourseService {
@@ -28,13 +29,18 @@ public class CourseService {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    // Método para validar si el ID tiene formato UUID
+    private boolean isValidUUID(String uuid) {
+        String uuidRegex = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+        return Pattern.matches(uuidRegex, uuid);
+    }
+
     public ResponseEntity<CustomResponse<List<Course>>> getAllCourses() {
         try {
             List<Course> courses = courseRepository.findAll();
             return new ResponseEntity<>(new CustomResponse<>(
                     200, "OK", false, courses
             ), HttpStatus.OK);
-
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
                     500, "An error has occurred, please try again later", true, null
@@ -44,6 +50,12 @@ public class CourseService {
 
     public ResponseEntity<CustomResponse<Course>> getCourseById(String courseId) {
         try {
+            // Validar si courseId tiene formato UUID válido
+            if (!isValidUUID(courseId)) {
+                return new ResponseEntity<>(new CustomResponse<>(
+                        400, "Invalid course ID format", true, null
+                ), HttpStatus.BAD_REQUEST);
+            }
             Course course = courseRepository.findById(UUID.fromString(courseId))
                     .orElseThrow(() -> new NoSuchElementException("Course not found"));
 
@@ -98,15 +110,19 @@ public class CourseService {
             course.setDescription(courseDTO.getDescription());
 
             // Assign the teacher if they exist
-            if (courseDTO.getTeacherId() != null && !courseDTO.getTeacherId().toString().isEmpty()) {
+            if (courseDTO.getTeacherId() != null && !courseDTO.getTeacherId().isEmpty()) {
                 UUID teacherId = UUID.fromString(courseDTO.getTeacherId());
 
-                if (teacherRepository.existsById(teacherId)) {
-                    Teacher teacher = new Teacher();
-                    teacher.setIdUserInfo(teacherId);
-                    course.setTeacher(teacher);
+                Optional<Teacher> teacherOptional = teacherRepository.findById(teacherId);
+                if (teacherOptional.isPresent()) {
+                    course.setTeacher(teacherOptional.get());
+                } else {
+                    return new ResponseEntity<>(new CustomResponse<>(
+                            400, "The teacher does not exist", true, null
+                    ), HttpStatus.BAD_REQUEST);
                 }
             }
+
 
             // Save the course
             Course savedCourse = courseRepository.save(course);
