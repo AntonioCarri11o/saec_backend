@@ -11,6 +11,4 @@ import lombok.NoArgsConstructor;
 public abstract class Question {
     private String title;
     private QuestionCategory questionCategory;
-
-    abstract Answer evaluate(Answer questionAnswer, Answer userAnswer) throws ClassCastException;
 }

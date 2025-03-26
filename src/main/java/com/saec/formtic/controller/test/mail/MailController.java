@@ -1,10 +1,9 @@
-package com.saec.formtic.controller.exam.mail;
+package com.saec.formtic.controller.test.mail;
 
-import com.saec.formtic.controller.exam.mail.mailDTO.MailRequestDTO;
+import com.saec.formtic.controller.test.mail.mailDTO.MailRequestDTO;
 import com.saec.formtic.service.mail.MailServise;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.mail.MessagingException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

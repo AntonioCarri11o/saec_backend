@@ -12,15 +12,12 @@ public class SimpleOpenQuestion extends Question {
         super(title, QuestionCategory.SIMPLE_OPEN);
     }
 
-    @Override
-    Answer evaluate(Answer questionAnswer, Answer userAnswer) {
-        if (!(questionAnswer instanceof SimpleAnswer) || !(userAnswer instanceof SimpleAnswer)) {
-            throw new ClassCastException("SimpleOpenQuestion expects SimpleAnswer, but got: "
-                    + questionAnswer.getClass().getName() + " and "
-                    + userAnswer.getClass().getName());
-        }
-        SimpleAnswer simpleQuestionAnswer = (SimpleAnswer) questionAnswer;
-        SimpleAnswer simpleUserAnswer = (SimpleAnswer) userAnswer;
-        return new SimpleAnswer(simpleUserAnswer.getAnswerString(), simpleQuestionAnswer.isCorrect());
+    public SimpleAnswer evaluate(Answer answer) {
+        if(!(answer instanceof SimpleAnswer)) throw new IllegalArgumentException("A simple open question implements SimpleAnswer not an Answer");
+        
+        SimpleAnswer simpleAnswer = (SimpleAnswer) answer;
+        if(simpleAnswer.getAnswerString().isEmpty()) throw new IllegalArgumentException("The answer cannot be empty");
+
+        return new SimpleAnswer(((SimpleAnswer) answer).getAnswerString(), answer.isCorrect());
     }
 }

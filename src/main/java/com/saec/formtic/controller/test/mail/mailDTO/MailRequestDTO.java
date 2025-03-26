@@ -1,4 +1,4 @@
-package com.saec.formtic.controller.exam.mail.mailDTO;
+package com.saec.formtic.controller.test.mail.mailDTO;
 
 import lombok.Data;
 

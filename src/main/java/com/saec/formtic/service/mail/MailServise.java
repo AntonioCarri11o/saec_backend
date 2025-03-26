@@ -1,6 +1,6 @@
 package com.saec.formtic.service.mail;
 
-import com.saec.formtic.controller.exam.mail.mailDTO.MailRequestDTO;
+import com.saec.formtic.controller.test.mail.mailDTO.MailRequestDTO;
 import com.saec.formtic.model.mail.MailDesigns;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
