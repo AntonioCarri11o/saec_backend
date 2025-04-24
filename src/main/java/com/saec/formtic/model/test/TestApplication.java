@@ -55,6 +55,14 @@ public class TestApplication {
     @JoinColumn(name = "fk_employee")
     private Employee employee;
 
+    public TestApplication(Date startCourseDate, Date deadlineDate, MasterTest masterTest, Status status, Employee employee) {
+        this.startCourseDate = startCourseDate;
+        this.deadlineDate = deadlineDate;
+        this.masterTest = masterTest;
+        this.status = status;
+        this.employee = employee;
+    }
+
     @PrePersist
     private void generateUUID() {
         if(this.idTestApplication == null) {

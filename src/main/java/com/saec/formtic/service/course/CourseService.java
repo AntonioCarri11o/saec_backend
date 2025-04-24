@@ -6,7 +6,6 @@ import com.saec.formtic.repository.course.CourseRepository;
 import com.saec.formtic.model.user.Teacher;
 import com.saec.formtic.repository.user.TeacherRepository;
 import com.saec.formtic.utils.CustomResponse;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +27,7 @@ public class CourseService {
     @Autowired
     private TeacherRepository teacherRepository;
 
+    //Devuelve una lista de todos los cursos sin filtro
     public ResponseEntity<CustomResponse<List<Course>>> getAllCourses() {
         try {
             List<Course> courses = courseRepository.findAll();
@@ -36,24 +36,28 @@ public class CourseService {
             ), HttpStatus.OK);
 
         } catch (Exception e) {
-            return new ResponseEntity<>(new CustomResponse<>(
-                    500, "An error has occurred, please try again later", true, null
+            return new ResponseEntity<>(
+                    new CustomResponse<>(
+                            500,
+                            "An error has occurred, please try again later",
+                            true,
+                            null
             ), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    //Devuelve un curso con un Id específico
     public ResponseEntity<CustomResponse<Course>> getCourseById(String courseId) {
         try {
             Course course = courseRepository.findById(UUID.fromString(courseId))
                     .orElseThrow(() -> new NoSuchElementException("Course not found"));
 
             return new ResponseEntity<>(new CustomResponse<>(
-                    200, "OK", false, course
-            ), HttpStatus.OK);
+                    200, "OK", false, course), HttpStatus.OK);
 
         } catch (NoSuchElementException e) {
-            return new ResponseEntity<>(new CustomResponse<>(
-                    404, e.getMessage(), true, null
+            return new ResponseEntity<>(
+                    new CustomResponse<>(404, e.getMessage(), true, null
             ), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             return new ResponseEntity<>(new CustomResponse<>(
@@ -62,12 +66,12 @@ public class CourseService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Page<Course>>> getCoursesByName(String name, int page, int size) {
+    //Devuelve una lista paginada de cursos filtrados por nombre
+    public ResponseEntity<CustomResponse<Page<Course>>>
+    getCoursesByName(String name, int page, int size) {
         try {
-            Pageable pageable = PageRequest.of(page, size, Sort.by("name").ascending());
-
-            // If the name is empty, return all courses; otherwise, filter by name
-            // Pagination is always applied
+            Pageable pageable = PageRequest
+                    .of(page, size, Sort.by("name").ascending());
             Page<Course> courses = (name == null || name.trim().isEmpty()) ?
                     courseRepository.findAll(pageable) :
                     courseRepository.findByNameContainingIgnoreCase(name, pageable);
@@ -83,32 +87,35 @@ public class CourseService {
         }
     }
 
-    public ResponseEntity<CustomResponse<Course>> createCourse(@Valid UpdateCreateCourseDTO courseDTO) {
+    public ResponseEntity<CustomResponse<Course>> createCourse(UpdateCreateCourseDTO courseDTO) {
         try {
-            // Check if a course with the same name already exists
-            if (courseRepository.existsByName(courseDTO.getName())) {
+            // Verifica si no existe un curso con el mismo nombre ya registrado
+            if (courseRepository.existsByNameIgnoreCase(courseDTO.getName())) {
                 return new ResponseEntity<>(new CustomResponse<>(
                         400, "The course already exists", true, null
                 ), HttpStatus.BAD_REQUEST);
             }
 
-            // Create the course object
+            // Crea un nuevo objeto Curso
             Course course = new Course();
             course.setName(courseDTO.getName());
             course.setDescription(courseDTO.getDescription());
 
-            // Assign the teacher if they exist
-            if (courseDTO.getTeacherId() != null && !courseDTO.getTeacherId().toString().isEmpty()) {
-                UUID teacherId = UUID.fromString(courseDTO.getTeacherId());
+            // Crea un nuevo objeto UUID a partir de la cadena en el dto
+            UUID teacherId = UUID.fromString(courseDTO.getTeacherId());
 
-                if (teacherRepository.existsById(teacherId)) {
-                    Teacher teacher = new Teacher();
-                    teacher.setIdUserInfo(teacherId);
-                    course.setTeacher(teacher);
-                }
+            if (teacherRepository.existsById(teacherId)) {
+                Teacher teacher = new Teacher();
+                teacher.setIdUserInfo(teacherId);
+                course.setTeacher(teacher);
+            } else {
+                return new ResponseEntity<>(
+                        new CustomResponse<>(
+                                400, "The teacher does not exist", true, null
+                        ),HttpStatus.BAD_REQUEST);
             }
 
-            // Save the course
+            // Guardar el curso
             Course savedCourse = courseRepository.save(course);
 
             return new ResponseEntity<>(new CustomResponse<>(
@@ -138,19 +145,23 @@ public class CourseService {
             course.setName(dto.getName());
             course.setDescription(dto.getDescription());
 
-            // Assign the teacher if they exist
-            if (dto.getTeacherId() != null && !dto.getTeacherId().toString().isEmpty()) {
-                UUID teacherId = UUID.fromString(dto.getTeacherId());
+            UUID teacherId = UUID.fromString(dto.getTeacherId());
+
+            // Si  cambió el ID del teacher valida y asigna el nuevo
+            if (!teacherId.equals(course.getTeacher().getIdUserInfo())) {
                 if (teacherRepository.existsById(teacherId)) {
                     Teacher teacher = new Teacher();
                     teacher.setIdUserInfo(teacherId);
                     course.setTeacher(teacher);
+                } else {
+                    return new ResponseEntity<>(
+                            new CustomResponse<>(
+                                    400, "The teacher does not exist", true, null
+                            ),HttpStatus.BAD_REQUEST);
                 }
-            } else {
-                course.setTeacher(null);
             }
 
-            // Save the changes
+            // Guardar los cambios
             Course updatedCourse = courseRepository.save(course);
             return new ResponseEntity<>(new CustomResponse<>(
                     200, "Course successfully updated", false, updatedCourse

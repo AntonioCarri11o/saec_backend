@@ -4,23 +4,18 @@ import com.saec.formtic.model.test.answer.Answer;
 import com.saec.formtic.model.test.answer.SimpleAnswer;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.data.annotation.TypeAlias;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
+@TypeAlias("SIMPLE_OPEN")
 public class SimpleOpenQuestion extends Question {
     public SimpleOpenQuestion(String title) {
-        super(title, QuestionCategory.SIMPLE_OPEN);
+        super(title, QuestionCategory.SIMPLE_OPEN, new SimpleAnswer(""));
     }
 
     @Override
-    Answer evaluate(Answer questionAnswer, Answer userAnswer) {
-        if (!(questionAnswer instanceof SimpleAnswer) || !(userAnswer instanceof SimpleAnswer)) {
-            throw new ClassCastException("SimpleOpenQuestion expects SimpleAnswer, but got: "
-                    + questionAnswer.getClass().getName() + " and "
-                    + userAnswer.getClass().getName());
-        }
-        SimpleAnswer simpleQuestionAnswer = (SimpleAnswer) questionAnswer;
-        SimpleAnswer simpleUserAnswer = (SimpleAnswer) userAnswer;
-        return new SimpleAnswer(simpleUserAnswer.getAnswerString(), simpleQuestionAnswer.isCorrect());
+    Answer evaluate(Answer userAnswer) {
+        return null;
     }
 }

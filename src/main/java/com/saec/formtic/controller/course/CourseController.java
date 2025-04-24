@@ -9,20 +9,15 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+
 
 @RestController
 @RequestMapping("/api/course")
 @CrossOrigin({"*"})
 public class CourseController {
-
-
     @Autowired
     private CourseService courseService;
 
@@ -43,8 +38,8 @@ public class CourseController {
 
 
     // Endpoint para obtener cursos con paginación y filtrado por nombre
-    //http://localhost:8080/api/course/list?name=Java&page=1&size=5     -----por si quieres un numero el elementos en especifico
-    //http://localhost:8080/api/course/list?name=Java&page=1            ----por si quieres obtener 10 (esta por defecto que sean 10)
+    //http://localhost:8080/api/course/list?name=Java&page=1&size=5
+    //http://localhost:8080/api/course/list?name=Java&page=1
     @GetMapping("/list")
     public ResponseEntity<CustomResponse<Page<Course>>> getCourses(
             @RequestParam(required = false, defaultValue = "") String name,
@@ -54,14 +49,14 @@ public class CourseController {
         return courseService.getCoursesByName(name, page, size);
     }
 
-    //para crear el curso
+    //Crear un nuevo curso
     @PostMapping("/create")
     public ResponseEntity<CustomResponse<Course>> createCourse(@Valid @RequestBody UpdateCreateCourseDTO courseDTO) {
         // Llamada al servicio pasando el DTO
         return courseService.createCourse(courseDTO);
     }
 
-    //para actualizar el curso
+    //Actualizar un curso
     @PutMapping("/{courseId}")
     public ResponseEntity<CustomResponse<Course>> updateCourse(
             @PathVariable String courseId,

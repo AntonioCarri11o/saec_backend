@@ -3,8 +3,6 @@ package com.saec.formtic.service.user;
 import com.saec.formtic.controller.user.employee.employeeDTO.EmployeNameDTO;
 import com.saec.formtic.controller.user.employee.employeeDTO.EmployeeDTO;
 import com.saec.formtic.controller.user.employee.employeeDTO.UpdateEmployeeDTO;
-import com.saec.formtic.model.department.Department;
-import com.saec.formtic.model.job.JobAssignment;
 import com.saec.formtic.model.role.Role;
 import com.saec.formtic.model.role.RoleName;
 import com.saec.formtic.model.status.Status;
@@ -12,7 +10,6 @@ import com.saec.formtic.model.status.StatusCategory;
 import com.saec.formtic.model.status.StatusName;
 import com.saec.formtic.model.user.Employee;
 import com.saec.formtic.repository.department.DepartmentRepository;
-import com.saec.formtic.repository.job.JobAssignmentRepository;
 import com.saec.formtic.repository.role.RoleRepository;
 import com.saec.formtic.repository.status.StatusRepository;
 import com.saec.formtic.repository.user.EmployeeRepository;
@@ -27,10 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import java.sql.SQLTransientException;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @Service
@@ -39,16 +34,14 @@ public class EmployeeService {
     RoleRepository roleRepository;
     StatusRepository statusRepository;
     DepartmentRepository departmentRepository;
-    JobAssignmentRepository jobAssignmentRepository;
     private PasswordEncoder encoder;
 
     @Autowired
-    EmployeeService(EmployeeRepository employeeRepository, RoleRepository roleRepository, StatusRepository statusRepository, DepartmentRepository departmentRepository, JobAssignmentRepository jobAssignmentRepository, PasswordEncoder encoder) {
+    EmployeeService(EmployeeRepository employeeRepository, RoleRepository roleRepository, StatusRepository statusRepository, DepartmentRepository departmentRepository, PasswordEncoder encoder) {
         this.employeeRepository = employeeRepository;
         this.roleRepository = roleRepository;
         this.statusRepository = statusRepository;
         this.departmentRepository = departmentRepository;
-        this.jobAssignmentRepository = jobAssignmentRepository;
         this.encoder = encoder;
     }
 
@@ -67,51 +60,6 @@ public class EmployeeService {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new CustomResponse(200, "Employees list", false, employees));
     }
-
-    //Servicio para listar empleados por departamento y status
-    public ResponseEntity<CustomResponse<List<JobAssignment>>> findAllByDepartmentAndEmployeeStatus(String departmentId, String statusName) {
-        if(Utils.itsBlankString(departmentId))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomResponse(400, "The department id is mandatory", true, null));
-        if(Utils.itsBlankString(statusName))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomResponse(400, "The status is mandatory", true, null));
-        statusName = statusName.trim().toUpperCase();
-        try{
-            StatusName.valueOf(statusName);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomResponse(400, "The status is not valid", true, null));
-        }
-
-        Optional<Status> statusOptional = statusRepository.findByNameAndCategory(StatusName.valueOf(statusName), StatusCategory.USER);
-        Optional<Department> departmentOptional;
-
-        try {
-            UUID departmentUUID = UUID.fromString(departmentId);
-            departmentOptional = departmentRepository.findById(UUID.fromString(departmentUUID.toString()));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomResponse(400, "The department id is not valid", true, null));
-        } catch (DataAccessException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomResponse(500, "Database error", true, null));
-        }
-
-        if(statusOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomResponse(404, "Status not found", true, null));
-        if(departmentOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomResponse(404, "Department not found", true, null));
-
-        Department department = departmentOptional.get();
-        Status status = statusOptional.get();
-
-        try {
-            List<JobAssignment> jobAssignments = jobAssignmentRepository.findJobAssignmentByDepartmentAndEmployeeStatus(department, status);
-            if(jobAssignments.isEmpty())
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomResponse(404, "Any employee founded", true, null));
-            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "Employees list", false, jobAssignments));
-        } catch (DataAccessException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CustomResponse(500, "Database error", true, null));
-        }
-    }
-
-
     //Servicio para listar empleados solo por status
     public ResponseEntity<CustomResponse<List<Employee>>> findAllByStatus(String statusName) {
         StatusName statusNameEnum;

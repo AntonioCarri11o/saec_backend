@@ -46,4 +46,12 @@ public class MasterTest {
             this.idMasterTest = UUID.randomUUID();
         }
     }
+
+    public MasterTest(String version, String name, Date expirationDate, Status status, Course course) {
+        this.version = version;
+        this.name = name;
+        this.expirationDate = expirationDate;
+        this.status = status;
+        this.course = course;
+    }
 }

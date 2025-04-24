@@ -3,7 +3,6 @@ package com.saec.formtic.controller.user.employee;
 import com.saec.formtic.controller.user.employee.employeeDTO.EmployeNameDTO;
 import com.saec.formtic.controller.user.employee.employeeDTO.EmployeeDTO;
 import com.saec.formtic.controller.user.employee.employeeDTO.UpdateEmployeeDTO;
-import com.saec.formtic.model.job.JobAssignment;
 import com.saec.formtic.model.user.Employee;
 import com.saec.formtic.service.user.EmployeeService;
 import com.saec.formtic.utils.CustomResponse;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
@@ -39,14 +37,6 @@ public class EmployeeController {
         return employeeService.findAllByStatus(statusName);
     }
 
-    //Controlador para filtrar a los empleados por departamento y status
-    @GetMapping("/list/statusAndDepartment")
-    public ResponseEntity<CustomResponse<List<JobAssignment>>> getEmployeesByStatusAndDepartment(
-            @RequestParam(required = false, defaultValue = "ENABLED") String status,
-            @RequestParam(required = false) String department
-            ) {
-        return employeeService.findAllByDepartmentAndEmployeeStatus(department, status);
-    }
 
     //Controlador para filtrar a los empleados por nombre
     @PostMapping("/list/name")

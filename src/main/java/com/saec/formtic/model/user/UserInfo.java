@@ -35,7 +35,6 @@ public class UserInfo {
     public interface ProfileView extends ListView {}
 
     @Id
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @GeneratedValue(generator = "UUID")
     @Column(name = "id_user_info")
     @JsonView(BasicView.class)

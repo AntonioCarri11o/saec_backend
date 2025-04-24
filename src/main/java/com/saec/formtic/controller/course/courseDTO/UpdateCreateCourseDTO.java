@@ -18,5 +18,6 @@ public class UpdateCreateCourseDTO {
     @Size(max = 255, message = "The description must not exceed 128 characters")
     private String description;
 
+    @NotBlank(message = "Teacher id is mandatory")
     private String teacherId;
 }
