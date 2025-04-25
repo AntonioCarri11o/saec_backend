@@ -1,6 +1,7 @@
 package com.saec.formtic.service.test;
 
 import com.saec.formtic.controller.test.testDTO.TestApplicationDTO;
+import com.saec.formtic.controller.test.testDTO.TestApplicationEmployeeAnswersDTO;
 import com.saec.formtic.controller.test.testDTO.TestDTO;
 import com.saec.formtic.controller.test.testDTO.TestQuestionsDTO;
 import com.saec.formtic.model.course.Course;
@@ -10,7 +11,11 @@ import com.saec.formtic.model.status.StatusName;
 import com.saec.formtic.model.test.MasterTest;
 import com.saec.formtic.model.test.MasterTestQuestions;
 import com.saec.formtic.model.test.TestApplication;
+import com.saec.formtic.model.test.TestApplicationEmployeeAnswers;
+import com.saec.formtic.model.test.answer.Answer;
+import com.saec.formtic.model.test.question.Question;
 import com.saec.formtic.model.user.Employee;
+import com.saec.formtic.repository.test.TestApplicationEmployeeAnswerRepository;
 import com.saec.formtic.repository.test.TestApplicationRepository;
 import com.saec.formtic.repository.test.TestQuestionsRepository;
 import com.saec.formtic.repository.test.TestRepository;
@@ -32,20 +37,22 @@ import java.util.stream.Collectors;
 @Service
 public class TestService {
     private final TestApplicationRepository testApplicationRepository;
-    private CourseRepository courseRepository;
-    private TestRepository testRepository;
-    private StatusRepository statusRepository;
-    private TestQuestionsRepository testQuestionsRepository;
-    private EmployeeRepository employeeRepository;
+    private final CourseRepository courseRepository;
+    private final TestRepository testRepository;
+    private final StatusRepository statusRepository;
+    private final TestQuestionsRepository testQuestionsRepository;
+    private final EmployeeRepository employeeRepository;
+    private final TestApplicationEmployeeAnswerRepository testApplicationEmployeeAnswerRepository;
 
     @Autowired
-    public TestService(CourseRepository courseRepository, TestRepository testRepository, StatusRepository statusRepository, TestQuestionsRepository testQuestionsRepository, EmployeeRepository employeeRepository, TestApplicationRepository testApplicationRepository) {
+    public TestService(CourseRepository courseRepository, TestRepository testRepository, StatusRepository statusRepository, TestQuestionsRepository testQuestionsRepository, EmployeeRepository employeeRepository, TestApplicationRepository testApplicationRepository, TestApplicationEmployeeAnswerRepository testApplicationEmployeeAnswerRepository) {
         this.courseRepository = courseRepository;
         this.testRepository = testRepository;
         this.statusRepository = statusRepository;
         this.testQuestionsRepository = testQuestionsRepository;
         this.employeeRepository = employeeRepository;
         this.testApplicationRepository = testApplicationRepository;
+        this.testApplicationEmployeeAnswerRepository = testApplicationEmployeeAnswerRepository;
     }
     public ResponseEntity<CustomResponse<List<MasterTest>>> getByCourse(String courseId) {
         try {
@@ -80,6 +87,28 @@ public class TestService {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new CustomResponse<>(400, "Master test not found", true, null)
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new CustomResponse<>(404, "Master test not found", true, null)
+            );
+        } catch (DataAccessException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new CustomResponse<>(500, "Internal Server Error", true, null)
+            );
+        }
+    }
+
+    public ResponseEntity<CustomResponse<List<TestApplication>>> getApplicationsByMasterTest(String id) {
+        try {
+            MasterTest masterTest = testRepository.findById(UUID.fromString(id)).orElseThrow(() -> new NoSuchElementException("MasterTest not found"));
+            List<TestApplication> testApplications = testApplicationRepository.findByMasterTest(masterTest);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new CustomResponse<>(200, "Tests list", false, testApplications)
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new CustomResponse<>(400, "Master id invalid", true, null)
             );
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -182,6 +211,102 @@ public class TestService {
         } catch (IllegalChannelGroupException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new CustomResponse<>(400, "Id not valid", true, null)
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new CustomResponse<>(404, e.getMessage(), true, null)
+            );
+        } catch (DataAccessException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new CustomResponse<>(500, "Internal Server Error", true, null)
+            );
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<CustomResponse<TestApplication>> answerTestApplication(TestApplicationEmployeeAnswersDTO testApplicationEmployeeAnswersDTO) {
+        try {
+            //Obtener la aplicación asignada
+            TestApplication testApplication = testApplicationRepository
+                    .findById(UUID.fromString(testApplicationEmployeeAnswersDTO
+                            .getTestApplicationId()))
+                    .orElseThrow(() -> new NoSuchElementException("Test application not found"));
+
+            //Obtener las preguntas del examen
+            MasterTestQuestions testQuestions = testQuestionsRepository
+                    .findByMasterTest(testApplication.getMasterTest()).orElseThrow(
+                            () -> new NoSuchElementException("Master test not found")
+                    );
+
+            //Cambiar el status de la asignación a completada
+            Status status = statusRepository.findByNameAndCategory(
+                    StatusName.COMPLETED, StatusCategory.TEST_APPLICATION
+            ).orElseThrow(() -> new NoSuchElementException("Status not found"));
+            testApplication.setStatus(status);
+
+            TestApplicationEmployeeAnswers answers =
+                    testApplicationEmployeeAnswersDTO
+                            .createTestApplicationEmployeeAnswers(testApplication);
+
+            List<Answer> evaluatedAnswers = new ArrayList<>();
+
+            //Evaluar las respuestas automáticamente
+            for(int i = 0; i < answers.getAnswers().size(); i++) {
+                Answer answer = answers.getAnswers().get(i);
+                Question question = testQuestions.getQuestions().get(i);
+                Answer evaluatedAnswer = answer;
+                evaluatedAnswer = question.evaluate(evaluatedAnswer);
+                evaluatedAnswers.add(evaluatedAnswer);
+            }
+
+            //Guardar las preguntas como evaluadas y marcar el examen como completado
+            answers.setAnswers(evaluatedAnswers);
+            testApplicationEmployeeAnswerRepository.save(answers);
+            TestApplication testApplicationSaved = testApplicationRepository.save(testApplication);
+
+            //Enviar una respuesta de operación exitosa
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new CustomResponse<>(201, "The answers was saved", false, testApplicationSaved)
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new CustomResponse<>(400, "Master id invalid", true, null)
+            );
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new CustomResponse<>(404, e.getMessage(), true, null)
+            );
+        } catch (DataAccessException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    new CustomResponse<>(500, "Internal Server Error", true, null)
+            );
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<CustomResponse<TestApplication>> evaluateTestApplicactionByTeacher(TestApplicationEmployeeAnswersDTO testApplicationEmployeeAnswersDTO) {
+        try {
+            TestApplication testApplication = testApplicationRepository
+                    .findById(UUID.fromString(
+                            testApplicationEmployeeAnswersDTO.getTestApplicationId()))
+                    .orElseThrow(() -> new NoSuchElementException("Test application not found"));
+
+            Status status = statusRepository
+                    .findByNameAndCategory(
+                            StatusName.EVALUATED, StatusCategory.TEST_APPLICATION)
+                    .orElseThrow(() -> new NoSuchElementException("Status not found"));
+            testApplication.setStatus(status);
+            TestApplicationEmployeeAnswers evaluatedAnswers = testApplicationEmployeeAnswersDTO
+                    .createTestApplicationEmployeeAnswers(testApplication);
+            testApplicationEmployeeAnswerRepository.save(evaluatedAnswers);
+            testApplicationRepository.save(testApplication);
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new CustomResponse<>(201, "Test evaluated", true, testApplication)
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new CustomResponse<>(400, "Master id invalid", true, null)
             );
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

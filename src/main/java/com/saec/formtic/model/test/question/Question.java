@@ -27,5 +27,5 @@ public abstract class Question {
     private String title;
     private QuestionCategory questionCategory;
     private Answer answer;
-    abstract Answer evaluate(Answer userAnswer) throws ClassCastException;
+    public abstract Answer evaluate(Answer userAnswer) throws ClassCastException;
 }

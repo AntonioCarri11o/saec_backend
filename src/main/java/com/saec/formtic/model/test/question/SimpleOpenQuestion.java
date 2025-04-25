@@ -15,7 +15,7 @@ public class SimpleOpenQuestion extends Question {
     }
 
     @Override
-    Answer evaluate(Answer userAnswer) {
+    public Answer evaluate(Answer userAnswer) {
         return null;
     }
 }
