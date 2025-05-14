@@ -5,13 +5,16 @@ import com.saec.formtic.model.role.RoleName;
 import com.saec.formtic.model.status.Status;
 import com.saec.formtic.model.status.StatusCategory;
 import com.saec.formtic.model.status.StatusName;
+import com.saec.formtic.model.user.UserInfo;
 import com.saec.formtic.repository.role.RoleRepository;
 import com.saec.formtic.repository.status.StatusRepository;
+import com.saec.formtic.repository.user.UserInfoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -21,7 +24,7 @@ public class BootConfig {
     private static final Logger logger = LoggerFactory.getLogger(BootConfig.class);
 
     @Bean
-    public ApplicationRunner init(StatusRepository statusRepository, RoleRepository roleRepository) {
+    public ApplicationRunner init(StatusRepository statusRepository, RoleRepository roleRepository, UserInfoRepository userRepository, PasswordEncoder encoder) {
         return args -> {
             if(statusRepository.count() == 0) {
                 loadStatus(statusRepository);
@@ -29,6 +32,7 @@ public class BootConfig {
             if(roleRepository.count() == 0) {
                 loadRoles(roleRepository);
             }
+            loadUserAdmin(userRepository, encoder, roleRepository, statusRepository);
         };
     }
 
@@ -94,5 +98,23 @@ public class BootConfig {
                         "Teacher user only cans evaluate the tests."
                 )
         ));
+    }
+
+    private void loadUserAdmin(UserInfoRepository userRepository, PasswordEncoder encoder, RoleRepository roleRepository, StatusRepository statusRepository) {
+        Role role = roleRepository.findFirstByName(RoleName.ADMIN).orElseThrow(() -> new RuntimeException("No admin role found"));
+        if(userRepository.countByRole(role) > 0) {
+            return;
+        }
+
+        Status status = statusRepository.findByNameAndCategory(StatusName.ENABLED, StatusCategory.USER).orElseThrow(() -> new RuntimeException("No status found"));
+        UserInfo admin = new UserInfo(
+                "ADMIN",
+                encoder.encode("Qwerty12345"),
+                "Administrador general",
+                role
+        );
+
+        admin.setStatus(status);
+        userRepository.save(admin);
     }
 }

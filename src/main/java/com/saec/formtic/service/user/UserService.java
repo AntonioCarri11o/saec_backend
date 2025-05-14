@@ -1,15 +1,15 @@
 package com.saec.formtic.service.user;
 
-import com.saec.formtic.repository.user.UserRepository;
+import com.saec.formtic.repository.user.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    UserRepository userRepository;
+    UserInfoRepository userRepository;
 
     @Autowired
-    UserService(UserRepository userRepository) {
+    UserService(UserInfoRepository userRepository) {
         this.userRepository = userRepository;
     }
 
