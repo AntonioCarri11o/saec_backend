@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.sql.SQLTransientException;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -169,6 +170,8 @@ public class EmployeeService {
             String hashedPassword = encoder.encode(employeeDTO.getPassword());
             employeeDTO.setPassword(hashedPassword);
             Employee employee = employeeDTO.createEmployee(employeeRole);
+            Status status = statusRepository.findByNameAndCategory(StatusName.CURRENT, StatusCategory.USER).orElseThrow(() -> new NoSuchElementException("Status not found"));
+            employee.setStatus(status);
             Employee savedEmployee = employeeRepository.save(employee);
             return ResponseEntity.status(HttpStatus.CREATED).body(new CustomResponse(201, "The employee was created", false, savedEmployee));
         } catch (DataAccessException e) {
